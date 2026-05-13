@@ -1,0 +1,11 @@
+services:
+  bluetooth-speaker:
+    build: .
+    container_name: bluetooth-speaker
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev/snd:/dev/snd
+    environment:
+      SPEAKER_NAME: "Any Phone Output"
+    restart: unless-stopped

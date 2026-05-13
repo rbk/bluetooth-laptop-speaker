@@ -1,0 +1,16 @@
+# PulseAudio system-mode config for Bluetooth A2DP sink
+
+# Bluetooth audio bridging
+load-module module-bluetooth-discover
+load-module module-bluetooth-policy
+
+# Allow clients to connect (optional, for debugging with pactl)
+load-module module-native-protocol-unix auth-anonymous=1
+
+# Always have at least a null sink so PulseAudio doesn't bail out
+load-module module-null-sink sink_name=null_fallback sink_properties=device.description=Fallback
+
+# Try to load real ALSA output — optional, won't abort if missing
+.nofail
+load-module module-alsa-sink
+.fail

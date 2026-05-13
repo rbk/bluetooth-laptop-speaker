@@ -1,0 +1,69 @@
+# any-phone-output
+
+Makes this machine behave like a Bluetooth speaker. Phones discover it, pair without a PIN, and stream audio via A2DP.
+
+## Prerequisites
+
+- Bluetooth adapter present on the host
+- Docker + Docker Compose
+
+```bash
+# Verify adapter is visible to the kernel
+hciconfig
+```
+
+BlueZ does **not** need to be installed on the host — the container runs its own `bluetoothd`.
+
+## Start
+
+```bash
+docker compose up -d
+docker compose logs -f
+```
+
+The device broadcasts as **"Any Phone Output"**. Open Bluetooth settings on any phone, find it, and tap to pair — no PIN required.
+
+## Stop
+
+```bash
+docker compose down
+```
+
+## Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `SPEAKER_NAME` | `Any Phone Output` | Name shown to pairing devices |
+
+Change it in `docker-compose.yml` under `environment`.
+
+## Audio output
+
+The container tries to load the host's default ALSA device (`hw:0`). If no sound card is detected, it falls back to a null sink (audio is received but discarded). To use a specific card:
+
+```yaml
+# docker-compose.yml
+environment:
+  PULSE_ALSA_DEVICE: "hw:1"  # override card index
+```
+
+Or edit `system.pa` and add `device=hw:X` to the `module-alsa-sink` line.
+
+## Troubleshooting
+
+**Device not discoverable:**
+```bash
+docker compose exec bluetooth-speaker bluetoothctl show
+```
+
+**No audio after pairing:**
+```bash
+docker compose exec bluetooth-speaker pactl list sinks short
+docker compose exec bluetooth-speaker pactl list sources short
+```
+
+**PulseAudio conflict with host:**  
+If the host is running a PulseAudio user session that has already claimed the Bluetooth A2DP profile, stop it first:
+```bash
+systemctl --user stop pulseaudio.socket pulseaudio.service
+```
