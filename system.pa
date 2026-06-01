@@ -10,7 +10,10 @@ load-module module-native-protocol-unix auth-anonymous=1
 # Always have at least a null sink so PulseAudio doesn't bail out
 load-module module-null-sink sink_name=null_fallback sink_properties=device.description=Fallback
 
-# Try to load real ALSA output — optional, won't abort if missing
+# Load the UMC404HD as the real ALSA output (referenced by card name so it
+# survives USB reorder). .nofail = don't abort PA startup if it's unplugged.
 .nofail
-load-module module-alsa-sink
+load-module module-alsa-sink device=hw:U192k,0 sink_name=umc sink_properties=device.description="UMC404HD"
+set-default-sink umc
+set-sink-volume umc 65536
 .fail
