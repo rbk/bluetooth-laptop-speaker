@@ -5,6 +5,11 @@ SPEAKER_NAME="${SPEAKER_NAME:-Any Phone Output}"
 
 echo "[bt-speaker] Starting as: $SPEAKER_NAME"
 
+# Clear stale runtime state from prior unclean exits — without this,
+# dbus-daemon refuses to start ("pid file exists") and the container
+# enters a restart loop, since /run is part of the writable layer.
+rm -f /run/dbus/pid /run/dbus/system_bus_socket /var/run/pulse/pid
+
 # D-Bus system daemon — needed by bluetoothd and PulseAudio
 mkdir -p /var/run/dbus
 dbus-daemon --system --fork

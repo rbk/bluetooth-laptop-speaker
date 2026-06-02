@@ -67,3 +67,19 @@ If the host is running a PulseAudio user session that has already claimed the Bl
 ```bash
 systemctl --user stop pulseaudio.socket pulseaudio.service
 ```
+
+**Phone asks for a PIN / can't reconnect:**  
+Usually means a stale bond on the speaker side. List, inspect, and remove bonds with `bluetoothctl`:
+```bash
+# List paired devices
+docker compose exec bluetooth-speaker bluetoothctl devices Paired
+
+# Inspect one
+docker compose exec bluetooth-speaker bluetoothctl info <MAC>
+
+# Remove a bond (cleans both the filesystem record and runtime state)
+docker compose exec bluetooth-speaker bluetoothctl remove <MAC>
+```
+After removing, also "forget" the speaker on the phone, then pair again.
+
+Bonds are stored in `/var/lib/bluetooth/` inside the container, which is part of the writable layer — they survive `docker compose restart` but are wiped by `docker compose down`.
