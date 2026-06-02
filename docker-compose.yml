@@ -6,6 +6,7 @@ services:
     privileged: true
     volumes:
       - /dev/snd:/dev/snd
+      - ./bt-bonds:/var/lib/bluetooth
     environment:
       SPEAKER_NAME: "Any Phone Output"
     restart: unless-stopped

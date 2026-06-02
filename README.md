@@ -82,4 +82,4 @@ docker compose exec bluetooth-speaker bluetoothctl remove <MAC>
 ```
 After removing, also "forget" the speaker on the phone, then pair again.
 
-Bonds are stored in `/var/lib/bluetooth/` inside the container, which is part of the writable layer — they survive `docker compose restart` but are wiped by `docker compose down`.
+Bonds are stored in `./bt-bonds/` on the host (bind-mounted to `/var/lib/bluetooth/` in the container) — they survive `docker compose down`. To wipe all bonds, delete the folder: `sudo rm -rf ./bt-bonds`.
