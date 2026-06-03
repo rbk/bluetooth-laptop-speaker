@@ -9,9 +9,27 @@ from gi.repository import GLib
 AGENT_IFACE = "org.bluez.Agent1"
 AGENT_PATH = "/org/bluez/agent"
 MANAGER_IFACE = "org.bluez.AgentManager1"
+DEVICE_IFACE = "org.bluez.Device1"
+PROPS_IFACE = "org.freedesktop.DBus.Properties"
 
 
 class AutoAcceptAgent(dbus.service.Object):
+    def __init__(self, bus, path):
+        super().__init__(bus, path)
+        self.bus = bus
+
+    def _trust(self, device):
+        """Mark a device Trusted so future reconnects auto-authorize without
+        needing the agent — makes reconnection reliable, not racy."""
+        try:
+            props = dbus.Interface(
+                self.bus.get_object("org.bluez", device), PROPS_IFACE
+            )
+            props.Set(DEVICE_IFACE, "Trusted", dbus.Boolean(True))
+            print(f"[agent] Trusted {device}")
+        except dbus.DBusException as e:
+            print(f"[agent] Could not trust {device}: {e}")
+
     @dbus.service.method(AGENT_IFACE, in_signature="", out_signature="")
     def Release(self):
         pass
@@ -19,6 +37,7 @@ class AutoAcceptAgent(dbus.service.Object):
     @dbus.service.method(AGENT_IFACE, in_signature="os", out_signature="")
     def AuthorizeService(self, device, uuid):
         print(f"[agent] Authorizing service {uuid} for {device}")
+        self._trust(device)
 
     @dbus.service.method(AGENT_IFACE, in_signature="o", out_signature="s")
     def RequestPinCode(self, device):

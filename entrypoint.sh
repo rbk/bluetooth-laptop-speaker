@@ -35,6 +35,12 @@ bluetoothctl discoverable on
 bluetoothctl system-alias "$SPEAKER_NAME" 2>/dev/null || \
     bluetoothctl set-alias "$SPEAKER_NAME"
 
+# Trust devices already bonded from prior runs so they reconnect cleanly
+# without waiting on the agent. New pairings get trusted by agent.py.
+for mac in $(bluetoothctl devices 2>/dev/null | awk '{print $2}'); do
+    bluetoothctl trust "$mac" >/dev/null 2>&1 || true
+done
+
 echo "[bt-speaker] Adapter ready. Discoverable as: $SPEAKER_NAME"
 
 # BlueZ resets Discoverable after 180s — keep refreshing

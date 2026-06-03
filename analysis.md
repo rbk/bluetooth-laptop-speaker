@@ -28,6 +28,21 @@ PulseAudio's `module-bluetooth-discover` registers as the A2DP profile handler w
 
 User-mode PulseAudio would connect to a session D-Bus, which doesn't exist in the container.
 
+### Why `JustWorksRepairing = always` + trust-on-connect?
+
+Phones rotate their link keys, so a stored bond eventually stops matching what
+the phone presents. BlueZ's default repairing policy (`never`) rejects this and
+fails A2DP with `Permission denied (13)` on AVDTP, forcing a manual forget +
+re-pair — the "re-pair daily" symptom. Setting `JustWorksRepairing = always` in
+`main.conf` lets the NoInputNoOutput agent silently re-bond instead.
+
+Devices are also marked `Trusted` (in `agent.py` on connect, and in
+`entrypoint.sh` for pre-existing bonds) so reconnects auto-authorize.
+
+Crucially this lives entirely in **BlueZ**, the pairing/bonding layer — every
+audio backend below (PulseAudio, PipeWire, bluez-alsa) bonds through BlueZ, so
+swapping the audio stack would not have fixed reconnection.
+
 ### Why `--privileged`?
 
 Required for:
@@ -55,8 +70,8 @@ The agent accepts all requests unconditionally — any device can pair. This is 
 
 | Approach | Pro | Con |
 |---|---|---|
-| `bluez-alsa` (bluealsad) | Lighter, purpose-built for BT audio | Not in standard Ubuntu repos, needs PPA or build from source |
-| PipeWire | Modern, handles BT natively | More complex config, newer distro required |
+| `bluez-alsa` (bluealsad) | Lighter, purpose-built for BT audio | Not in standard Ubuntu repos, needs PPA or build from source; same BlueZ bonding layer, so no effect on reconnection reliability |
+| PipeWire | Modern, handles BT natively; fewer stream underruns than PA system-mode | More complex config, newer distro required; same BlueZ bonding layer |
 | Run own bluetoothd in container | Self-contained | Conflicts with host daemon, needs to stop host service |
 | `bt-agent` from bluez-tools | One-line pairing agent | Doesn't explicitly handle `AuthorizeService`, less reliable for A2DP |
 

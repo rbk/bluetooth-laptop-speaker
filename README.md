@@ -37,6 +37,22 @@ docker compose down
 
 Change it in `docker-compose.yml` under `environment`.
 
+## Reliable reconnection (no daily re-pairing)
+
+Phones rotate their Bluetooth link keys over time. By default BlueZ refuses a
+peer whose key no longer matches the stored bond — the connection fails with
+`Permission denied (13)` on AVDTP, and you're forced to "forget" the device and
+pair again. This setup avoids that:
+
+- **`main.conf`** sets `JustWorksRepairing = always`, so a device whose key has
+  diverged silently re-bonds through the auto-accept agent — no human action.
+- Devices are marked **`Trusted`** automatically (on connect via `agent.py`, and
+  on startup for already-bonded devices via `entrypoint.sh`), so reconnects
+  auto-authorize instead of racing the agent.
+
+This is a BlueZ *bonding* concern, not an audio one — switching the audio stack
+(PipeWire, bluez-alsa) would not change it, since they all pair through BlueZ.
+
 ## Audio output
 
 The container tries to load the host's default ALSA device (`hw:0`). If no sound card is detected, it falls back to a null sink (audio is received but discarded). To use a specific card:
@@ -69,7 +85,7 @@ systemctl --user stop pulseaudio.socket pulseaudio.service
 ```
 
 **Phone asks for a PIN / can't reconnect:**  
-Usually means a stale bond on the speaker side. List, inspect, and remove bonds with `bluetoothctl`:
+With `JustWorksRepairing = always` (see [Reliable reconnection](#reliable-reconnection-no-daily-re-pairing)) a key mismatch normally self-heals on the next connect. If a bond is genuinely wedged, remove it on the speaker side and re-pair. List, inspect, and remove bonds with `bluetoothctl`:
 ```bash
 # List paired devices
 docker compose exec bluetooth-speaker bluetoothctl devices Paired

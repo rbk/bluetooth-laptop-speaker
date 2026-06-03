@@ -12,6 +12,7 @@ RUN apt-get update && apt-get install -y \
     alsa-utils \
     && rm -rf /var/lib/apt/lists/*
 
+COPY main.conf /etc/bluetooth/main.conf
 COPY system.pa /etc/pulse/system.pa
 COPY entrypoint.sh /entrypoint.sh
 COPY agent.py /agent.py
