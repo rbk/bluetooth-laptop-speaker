@@ -35,7 +35,39 @@ docker compose down
 |---|---|---|
 | `SPEAKER_NAME` | `Any Phone Output` | Name shown to pairing devices |
 
-Change it in `docker-compose.yml` under `environment`.
+Change it in `docker-compose.yml` under `environment`. The same name is also
+baked into `main.conf` (`Name =`), which applies the instant bluetoothd starts —
+without it the adapter briefly broadcasts "BlueZ 5.64" during startup, and
+phones/Macs cache that scanned name per adapter MAC (surviving even a
+"forget device"; clear it by toggling Bluetooth off/on on the client). If you
+rename the speaker, change it in both places.
+
+## Bluetooth adapter
+
+This host has an internal Intel combo Wi-Fi/BT radio (USB `8087:0a2a`) with a
+single shared antenna, which caused choppy A2DP audio and growing latency at
+range (see `choppy-audio-diagnosis.md`). It's replaced by an external USB
+Bluetooth dongle for better range and a dedicated antenna.
+
+Because `docker-compose.yml` runs the container with `network_mode: host` and
+`privileged: true`, BlueZ inside the container sees every adapter the host
+sees and picks one as "default" — which one is not guaranteed to stay the
+same across reboots or replugs. `toggle-internal-bluetooth.sh` avoids that by
+deauthorizing the internal radio at the USB level (via a udev rule) so it can
+never bind and be picked, no matter what order devices enumerate in:
+
+```bash
+sudo ./toggle-internal-bluetooth.sh disable   # deauthorize now + install udev rule (persists)
+sudo ./toggle-internal-bluetooth.sh enable    # remove the udev rule + reauthorize now
+./toggle-internal-bluetooth.sh status         # check current state (no sudo needed)
+```
+
+Output is also appended to `toggle-internal-bluetooth.log` next to the
+script, since these commands are normally run interactively with `sudo`.
+
+Switching which physical adapter the container uses changes its Bluetooth
+address, so already-paired phones will need to forget and re-pair the
+speaker afterward.
 
 ## Reliable reconnection (no daily re-pairing)
 

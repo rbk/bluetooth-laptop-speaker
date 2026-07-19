@@ -1,0 +1,39 @@
+=== 2026-07-06 22:45:34 toggle-internal-bluetooth.sh disable ===
+Installed udev rule: /etc/udev/rules.d/99-disable-internal-bt.rules
+Deauthorized attached device at /sys/bus/usb/devices/2-7
+=== 2026-07-06 23:16:20 toggle-internal-bluetooth.sh status ===
+udev rule: present (/etc/udev/rules.d/99-disable-internal-bt.rules) — internal BT stays disabled across reboots/replugs
+device: attached but deauthorized (disabled)
+=== 2026-07-06 23:29:02 toggle-internal-bluetooth.sh enable ===
+Removed udev rule: /etc/udev/rules.d/99-disable-internal-bt.rules
+Reauthorized device at /sys/bus/usb/devices/2-7
+=== 2026-07-06 23:29:08 toggle-internal-bluetooth.sh status ===
+udev rule: absent — internal BT is free to bind on next plug/boot
+device: attached and authorized (active)
+=== 2026-07-06 23:29:16 toggle-internal-bluetooth.sh disable ===
+Installed udev rule: /etc/udev/rules.d/99-disable-internal-bt.rules
+Deauthorized attached device at /sys/bus/usb/devices/2-7
+=== 2026-07-06 23:32:14 toggle-internal-bluetooth.sh enable ===
+Removed udev rule: /etc/udev/rules.d/99-disable-internal-bt.rules
+Reauthorized device at /sys/bus/usb/devices/2-7
+=== 2026-07-06 23:32:24 toggle-internal-bluetooth.sh status ===
+udev rule: absent — internal BT is free to bind on next plug/boot
+device: attached and authorized (active)
+=== 2026-07-06 23:36:51 toggle-internal-bluetooth.sh status ===
+udev rule: absent — internal BT is free to bind on next plug/boot
+device: attached and authorized (active)
+=== 2026-07-06 23:39:58 toggle-internal-bluetooth.sh disable ===
+Installed udev rule: /etc/udev/rules.d/99-disable-internal-bt.rules
+Deauthorized attached device at /sys/bus/usb/devices/2-7
+=== 2026-07-06 23:41:59 toggle-internal-bluetooth.sh status ===
+udev rule: present (/etc/udev/rules.d/99-disable-internal-bt.rules) — internal BT stays disabled across reboots/replugs
+device: attached but deauthorized (disabled)
+=== 2026-07-07 00:16:14 toggle-internal-bluetooth.sh enable ===
+Removed udev rule: /etc/udev/rules.d/99-disable-internal-bt.rules
+Reauthorized device at /sys/bus/usb/devices/2-7
+=== 2026-07-07 05:06:01 toggle-internal-bluetooth.sh enable ===
+No udev rule present.
+No device currently attached; it will bind normally on next plug/boot.
+=== 2026-07-07 15:58:18 toggle-internal-bluetooth.sh status ===
+udev rule: absent — internal BT is free to bind on next plug/boot
+device: not currently attached
